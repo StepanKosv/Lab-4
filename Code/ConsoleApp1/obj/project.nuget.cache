@@ -1,8 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "2vP7fXXhuOzwMSHC8dVJYWrIhtU5dmVvQG0uAhJV7BABZ0nVA6BhZFX1LSa/5HLZtw1TFJ+4CcLYa8uIJ44sIg==",
+  "dgSpecHash": "P2H++Scn3dM=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Public\\Учеба Степан\\Программирование\\Lab 4 st\\Code\\ConsoleApp1\\ConsoleApp1.csproj",
-  "expectedPackageFiles": [],
+  "projectFilePath": "/Users/aleksandr/Downloads/lr 4 st/Code/ConsoleApp1/ConsoleApp1.csproj",
+  "expectedPackageFiles": [
+    "/Users/aleksandr/.nuget/packages/microsoft.netcore.app.ref/6.0.33/microsoft.netcore.app.ref.6.0.33.nupkg.sha512",
+    "/Users/aleksandr/.nuget/packages/microsoft.aspnetcore.app.ref/6.0.33/microsoft.aspnetcore.app.ref.6.0.33.nupkg.sha512",
+    "/Users/aleksandr/.nuget/packages/microsoft.netcore.app.host.osx-x64/6.0.33/microsoft.netcore.app.host.osx-x64.6.0.33.nupkg.sha512"
+  ],
   "logs": []
 }

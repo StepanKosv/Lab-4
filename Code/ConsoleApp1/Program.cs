@@ -37,6 +37,53 @@ internal class Program
         defaultOpt();
     }
     */
+    static B[] Select<A,B>(A[] arr, Func<A,int,B> func){
+        B[] res=new B[arr.Length];
+        for(int i=0; i<arr.Length; i++){
+            res[i]=func(arr[i],i);
+        }
+        return res;
+    }
+    static T[] Where<T>(T[] arr, Func<T,int,bool> cond){
+        bool[] match=Select(arr,cond);
+        int k=0;
+        foreach(bool f in match) if(f) k++;
+        T[] res=new T[k];
+        int ind=0;
+        for(int i=0; i<arr.Length; i++) if(match[i]){res[ind]=arr[i];ind++;};
+        return res;
+    }
+    static int Min(int[] arr){
+        int min=arr[0];
+        foreach(int e in arr) if(e<min) min=e;
+        return min;
+    }
+    static T[] OnPosRange<T>(T[] arr, int left, int right)=>Where(arr,(a,i)=>left<=i && i<right);
+    static int[] IntRange(int start, int step, int end){
+        if((start-end)/step<0) return new int[0];
+        int[] res=new int[(end-start)/step];
+        for(int i=0; i<(end-start)/step; i++){
+            res[i]=start+step*i;
+        }
+        return res;
+    }
+    static T[] Contact<T>(T[] prefix, T[] postfix){
+        return Select(
+            IntRange(0,prefix.Length+postfix.Length,1),
+            (a,i)=>{if(i<prefix.Length) return prefix[i]; else return postfix[i-prefix.Length];}
+        );
+    }
+    static T First<T>(T[] arr, Func<T,int,bool> cond){
+        for(int i=0; i<arr.Length; i++) if(cond(arr[i],i)) return arr[i];
+        throw new Exception("No such Element");
+    }
+    static T Last<T>(T[] arr, Func<T,int,bool> cond)=>First(
+        Select(
+            IntRange(arr.Length-1,-1,-1),
+            (a,i)=>arr[a]
+        ),
+        cond
+    );
     static void RunOnList(Option opt){
         if(!isListCreated){
             Console.WriteLine("ошибка: вы не создали список");
@@ -91,7 +138,7 @@ internal class Program
     }
     static int[] MergeSort(int[] l){
         if(l.Length<=1) return l;
-        return Merge(MergeSort(l.Where((a,i)=>i<l.Length/2).ToArray()),MergeSort(l.Where((a,i)=>i>=l.Length/2).ToArray()));
+        return Merge(MergeSort(Where(l,(a,i)=>i<l.Length/2)),MergeSort(Where(l,(a,i)=>i>=l.Length/2)));
     }
     static void QuickSort(int[] arr, int left, int right){
         if(right-left<=1) return;
@@ -108,8 +155,8 @@ internal class Program
                 i--;
             }
         }
-        QuickSort(arr,left,arr.Select((a,i)=>i).First((i)=>arr[i]==mid));
-        QuickSort(arr,arr.Select((a,i)=>i).Last((i)=>arr[i]==mid)+1,right);
+        QuickSort(arr,left,First(arr,(a,i)=>arr[i]==mid));
+        QuickSort(arr,Last(arr, (a,i)=>arr[i]==mid)+1,right);
     }
     static int InputLenght(int max){
         bool isCorrect=false;
@@ -166,17 +213,10 @@ internal class Program
     static void InsertElements(){
         int n=InputLenght(maxListLenght-list.Length);
         int k=InputPosition()-1;
-        int[] newlist=new int[list.Length+n];
-        for(int i=0;i<list.Length+n;i++){
-            if(k<=i && i<k+n){
-                newlist[i]=InputElement();
-            }else if(i>=k+n){
-                newlist[i]=list[i-n];
-            }else{
-                newlist[i]=list[i];
-            }
-        }
-        list=newlist;
+        int[] pref=OnPosRange(list,0,k);
+        int[] elements=Select(IntRange(0,n,1),(a,i)=>InputElement());
+        int[] post=OnPosRange(list,k,list.Length);
+        list=Contact(Contact(pref,elements),post);
         isListSorted=false;
         Console.WriteLine("Вставка элементов произведена успешно");
     }
@@ -192,20 +232,10 @@ internal class Program
         }
     }
     static void RemoveMin(){
-        int min=list.Min();
-        int k=list.Count((e)=>e==min);
-        int[] pos=list.Select((e,i)=>i+1).Where((e,i)=>list[i]==min).ToArray();
-        list=list.Where((e,i)=>pos.First()!=i+1).ToArray();
+        int min=Min(list);
+        int[] pos=Where(Select(list,(e,i)=>i+1),(e,i)=>list[i]==min);
+        list=Where(list, (e,i)=>pos.First()!=i+1);
         Console.WriteLine($"значение минимума:{min} его позиции:{String.Join(' ',pos)}. удалено первое вхождение минимума");
-    }
-    static int BinSearch(int key,int l, int r, Func<int,int,bool> comp,ref int k){
-        k+=1;
-        int m=(l+r)/2;
-        if(r-l<=1) return l;
-        if(comp(list[m],key)){
-            return BinSearch(key,l,m+1,comp,ref k);
-        }
-        return BinSearch(key,m,r,comp,ref k);
     }
     static int BinSearchLeft(int key,int l, int r, ref int k){
         k+=1;
@@ -231,28 +261,13 @@ internal class Program
             int k=0;
             int start=BinSearchLeft(key,-1,list.Length-1,ref k);
             int end=BinSearchRight(key,0,list.Length,ref k);
-            if(list[start]!=key) Console.WriteLine($"элемент отсутствует. количество действий:{k}");
+            if(list[start]!=key) Console.WriteLine($"элемент отсутствует. количество сравнений:{k}");
             else Console.WriteLine($"массив отсортирован в порядке возрастания, позиции элемента:{start+1}-{end+1}. количество сравнений:{k}");
         }else{
-            int k=0;
-            int c=0;
-            foreach(int i in list){
-                if (i==key)c+=1;
-                k++;
-            }
-            if (c==0) Console.WriteLine($"элемент отсутствует. количество действий:{k}");
-            else{
-                var pos=new int[c];
-                int ind=0;
-                for(int i=0;i<list.Length;i++){
-                    if(list[i]==key){
-                        pos[ind]=i+1;
-                        ind++;
-                    }
-                    k++;
-                }
-                Console.WriteLine($"массив не отсортирован, позиции элемента:{String.Join(' ',pos)}. количество сравнений:{k}");
-            }
+            int k=list.Length;
+            int[] pos=Where(IntRange(1,list.Length+1,1),(a,i)=>list[i]==key);
+            if (pos.Length==0) Console.WriteLine($"элемент отсутствует. количество сравнений:{k}");
+            else Console.WriteLine($"массив не отсортирован, позиции элемента:{String.Join(' ',pos)}. количество сравнений:{k}");
         }
     }
     static List<int> BucketStort(List<int> arr, int min, int max){
@@ -275,6 +290,7 @@ internal class Program
 
     private static void Main(string[] args)
     {
+        Console.WriteLine(Select(IntRange(0,10,1),(a,i)=>"abcdefgh"[a%8]));
         bool end=false;
         string menu="Меню"+'\n'+
         "Введите номер действия"+'\n'+
