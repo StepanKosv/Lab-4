@@ -82,7 +82,7 @@ internal class Program
             IntRange(arr.Length-1,-1,-1),
             (a,i)=>arr[a]
         ),
-        cond
+        (a,i)=>cond(a,arr.Length-i-1)
     );
     static void RunOnList(Option opt){
         if(!isListCreated){
@@ -155,8 +155,11 @@ internal class Program
                 i--;
             }
         }
-        QuickSort(arr,left,First(arr,(a,i)=>arr[i]==mid));
-        QuickSort(arr,Last(arr, (a,i)=>arr[i]==mid)+1,right);
+        int[] range=IntRange(0,arr.Length,1);
+        int r1=First(range,(a,i)=>arr[i]==mid);
+        int l1=Last(range, (a,i)=>arr[i]==mid)+1;
+        QuickSort(arr,left,r1);
+        QuickSort(arr,l1,right);
     }
     static int InputLenght(int max){
         bool isCorrect=false;
@@ -292,7 +295,7 @@ internal class Program
 
     private static void Main(string[] args)
     {
-        Console.WriteLine(Select(IntRange(0,10,1),(a,i)=>"abcdefgh"[a%8]));
+        //Console.WriteLine(Last());
         bool end=false;
         string menu="Меню"+'\n'+
         "Введите номер действия"+'\n'+
