@@ -75,7 +75,7 @@ internal class Program
     }
     static T First<T>(T[] arr, Func<T,int,bool> cond){
         for(int i=0; i<arr.Length; i++) if(cond(arr[i],i)) return arr[i];
-        throw new Exception("No such Element");
+        throw new Exception($"No such element in array");
     }
     static T Last<T>(T[] arr, Func<T,int,bool> cond)=>First(
         Select(
